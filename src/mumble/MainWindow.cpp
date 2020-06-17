@@ -54,6 +54,7 @@
 #include "Utils.h"
 #include "VersionCheck.h"
 #include "ViewCert.h"
+#include "VoiceProtocolType.h"
 #include "VoiceRecorderDialog.h"
 
 #ifdef Q_OS_WIN
@@ -1493,11 +1494,12 @@ void MainWindow::on_qaServerInformation_triggered() {
 
 	QString qsVoice, qsCrypt, qsAudio;
 
-	if (NetworkConfig::TcpModeEnabled()) {
+	if (NetworkConfig::TcpModeEnabled() || !c->csCrypt) {
 		qsVoice = tr("Voice channel is sent over control channel");
 	} else {
-		qsVoice = tr("<h2>Voice channel</h2><p>Encrypted with 128 bit OCB-AES128<br />%1 ms average latency (%4 "
+		qsVoice = tr("<h2>Voice channel</h2><p>Encrypted with %1<br />%2 ms average latency (%3 "
 					 "deviation)</p>")
+					  .arg(QString::fromStdString(VoiceProtocol(c->voiceProtocolType).toString()))
 					  .arg(boost::accumulators::mean(g.sh->accUDP), 0, 'f', 2)
 					  .arg(sqrt(boost::accumulators::variance(g.sh->accUDP)), 0, 'f', 2);
 		qsCrypt = QString::fromLatin1("<h2>%1</h2><table><tr><th></th><th>%2</th><th>%3</th></tr>"

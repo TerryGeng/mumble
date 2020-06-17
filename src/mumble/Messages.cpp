@@ -34,8 +34,10 @@
 #include "Utils.h"
 #include "VersionCheck.h"
 #include "ViewCert.h"
+#include "VoiceProtocolType.h"
 #include "crypto/CryptState.h"
 #include <QTextDocumentFragment>
+#include <string>
 
 // We define a global macro called 'g'. This can lead to issues when included code uses 'g' as a type or parameter name
 // (like protobuf 3.7 does). As such, for now, we have to make this our last include.
@@ -61,8 +63,34 @@
 		return;                                                                             \
 	}
 
-/// The authenticate message is being used by the client to send the authentication credentials to the server. Therefore
-/// the server won't send this message type to the client which is why this implementation does nothing.
+/// This message is being received after the client sent a Capabilities message with its preferred protocols inside.
+/// The server will reply with a Capabilities message with one option it determines to use.
+void MainWindow::msgCapabilities(const MumbleProto::Capabilities &msg) {
+	if (msg.supported_protocols_size() == 0) {
+		qWarning("Message: Voice protocol negotiation failed. No mutually acceptable protocol.");
+		return;
+	}
+
+	ConnectionPtr c = g.sh->cConnection;
+
+	VoiceProtocol protocol(msg.supported_protocols(0));
+
+	c->voiceProtocolType = protocol.protocolType;
+
+	if (protocol.protocolType == VoiceProtocolType::UNSUPPORTED) {
+		qWarning("Message: Drop invalid Capabilities message.");
+		return;
+	}
+
+	qInfo("Message: Voice protocol negotiation completed, use voice protocol %s", protocol.toString().c_str());
+
+	if (protocol.protocolType == VoiceProtocolType::UDP_AES_128_OCB2) {
+		c->initializeCipher();
+	}
+}
+
+/// The authenticate message is being used by the client to send the authentication credentials to the server. Therefore the
+/// server won't send this message type to the client which is why this implementation does nothing.
 void MainWindow::msgAuthenticate(const MumbleProto::Authenticate &) {
 }
 
@@ -1056,6 +1084,16 @@ void MainWindow::msgCryptSetup(const MumbleProto::CryptSetup &msg) {
 	ConnectionPtr c = g.sh->cConnection;
 	if (!c)
 		return;
+
+	// Connecting to an old server and Capabilities Message is not supported
+	// Assume OCB2 is used.
+	// TODO: Resend Capabilities message if the server is supposed to be new enough to handle it.
+	if (c->voiceProtocolType == VoiceProtocolType::UNDEFINED) {
+		qWarning("Messages: Cipher sync happens before protocol negotiation. Assuming AES_128_OCB2 is used.");
+		c->voiceProtocolType = VoiceProtocolType::UDP_AES_128_OCB2;
+		c->initializeCipher();
+	}
+
 	if (msg.has_key() && msg.has_client_nonce() && msg.has_server_nonce()) {
 		const std::string &key          = msg.key();
 		const std::string &client_nonce = msg.client_nonce();

@@ -14,6 +14,7 @@
 
 #include "ACL.h"
 #include "Ban.h"
+#include "Connection.h"
 #include "HostAddress.h"
 #include "Message.h"
 #include "Mumble.pb.h"
@@ -164,6 +165,7 @@ public:
 	Timer tUptime;
 
 	bool bValid;
+	bool bUdp;
 
 	void readParams();
 
