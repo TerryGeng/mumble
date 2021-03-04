@@ -4511,10 +4511,6 @@ The setting only applies for new messages, the already shown ones will retain th
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;h2&gt;Voice channel&lt;/h2&gt;&lt;p&gt;Encrypted with 128 bit OCB-AES128&lt;br /&gt;%1 ms average latency (%4 deviation)&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Register yourself as %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6177,6 +6173,10 @@ Valid actions are:
                 Stop talking
 
 </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;h2&gt;Voice channel&lt;/h2&gt;&lt;p&gt;Encrypted with %1&lt;br /&gt;%2 ms average latency (%3 deviation)&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
