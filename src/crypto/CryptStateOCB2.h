@@ -19,10 +19,7 @@ public:
 	static const unsigned int ivLength  = AES_BLOCK_SIZE;
 	static const unsigned int keyLength = AES_KEY_SIZE_BYTES;
 
-	/// The plain input and encrypted output of block cipher always preserve the same length.
-	/// However, in order to transmit authenticate tag and the packet sequence number,
-	/// An extra part will need to be attached to the packet.
-	/// This length varies from cipher to cipher and is stored in this `headLength`.
+	/// The head is one iv byte plus 3 bytes of tag
 	static const unsigned int headLength = 4;
 
 	CryptStateOCB2();
